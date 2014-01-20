@@ -1,8 +1,9 @@
+import re
 from photologue.models import Photo
 
 from django.db import models
 
-from twhst.rules import include_all, definition, no_rt, no_url, picture
+from twhst.rules import include_all, definition, no_rt, no_url, picture, no_mention
 
 
 HASHTAG_TYPE_CHOICES = ((0,'All'),
@@ -11,9 +12,10 @@ HASHTAG_TYPE_CHOICES = ((0,'All'),
                         (3,'Picture'))
 
 RULESET_DICT = {0: [include_all],
-                1: [definition, no_rt, no_url],
-                2: [include_all],
-                3: [picture]}
+                1: [definition, no_rt, no_url, no_mention],
+                2: [no_rt, no_url, no_mention],
+                3: [picture, no_mention]}
+
 
 class Hashtag(models.Model):
     name = models.CharField(max_length=30, db_index=True)
@@ -41,7 +43,12 @@ class Hashtag(models.Model):
                 return None
         self.create_status_from_result(result)
 
-            
+    def get_last_statuses(self):
+        return self.status_set.all()
+    
+    def __unicode__(self):
+        return self.name
+    
 class Status(models.Model):
     twitter_id = models.BigIntegerField(unique=True, db_index=True, primary_key=True)
     created_at = models.DateTimeField(db_index=True)
@@ -82,3 +89,7 @@ class Status(models.Model):
     user_url = models.CharField(max_length=255,null=True,blank=True)
 
     hashtag = models.ForeignKey(Hashtag)
+
+    def show_status(self):
+        #Do cleaning on save?
+        return re.sub(r'#' + self.hashtag.name, '', self.text,  flags=re.IGNORECASE)
