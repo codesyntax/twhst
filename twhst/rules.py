@@ -7,13 +7,16 @@ def url(result):
     return result.entities.get(u'urls')
 
 def no_url(result):
+    """ not(url) """
     return not(url(result))
 
 def rt(result):
     """ return True if status is a RT """
+    #Works only on real retweets (no replies with RT chain)
     return result.retweeted
 
 def no_rt(result):
+    """ not(rt )"""
     return not(rt(result))
 
 def picture(result):
@@ -21,7 +24,16 @@ def picture(result):
     pass
 
 def no_picture(result):
+    """ not(pinture) """
     return not(picture(result))
+
+def mention(result):
+    """ search @ char for user mentions """
+    return result.text.find('@')!=-1 and True or False
+
+def no_mention(result):
+    """ not(mention) """
+    return not(mention(result))
 
 def definition(result):
     """ return True if status text matched XXXX: pattern"""
