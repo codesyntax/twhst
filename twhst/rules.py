@@ -21,7 +21,10 @@ def no_rt(result):
 
 def picture(result):
     """ return True if status has a picture """
-    pass
+    media =  result.entities.get('media')
+    if media:
+        return media[0].get('type') == u'photo'
+    return False
 
 def no_picture(result):
     """ not(pinture) """
