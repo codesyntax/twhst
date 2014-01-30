@@ -107,8 +107,8 @@ class Status(models.Model):
         for url in data:
             if 'display_url' not in url.keys():
                 url['display_url'] = url['url']
-            if 'photo' in url.keys():
-                to_return.append([url['indices'][0],url['indices'][1], img_template % url])
+            if url.get('type') == u'photo':
+                to_return.append([url['indices'][0],url['indices'][1], img_template % {'url': url.get('media_url')}])
             else:
                 to_return.append([url['indices'][0],url['indices'][1], template % url])
         return to_return
