@@ -1,4 +1,5 @@
 import re
+import json
 from photologue.models import Photo
 
 from django.db import models
@@ -27,11 +28,14 @@ class Hashtag(models.Model):
     def create_status_from_result(self, result):
         status = Status(hashtag=self)
         for i in result.__dict__.keys():
+            if i == 'entities':
+                status.entities = json.dumps(getattr(result, i))
+                continue
             if hasattr(status, i):
                 setattr(status, i, getattr(result, i))
         for i in result.user.__dict__.keys():
-            if hasattr(status, i):
-                setattr(status, i, getattr(result.user, i))
+            if hasattr(status, u'user_' + i):
+                setattr(status, u'user_' + i, getattr(result.user, i))        
         status.twitter_id = result.id
         status.user_id = result.user.id
         status.user_created_at = result.user.created_at
@@ -75,8 +79,8 @@ class Status(models.Model):
     text = models.CharField(max_length=255)
     truncated = models.BooleanField(default=False)
 
-    user_id = models.BigIntegerField(db_index=True) 
-    screen_name = models.CharField(max_length=150)
+    user_id = models.BigIntegerField(db_index=True)
+    user_screen_name = models.CharField(max_length=150)
     user_created_at = models.DateTimeField()
     user_name = models.CharField(max_length=150,null=True,blank=True)
     user_profile_image_url = models.CharField(max_length=255,null=True,blank=True)
@@ -93,3 +97,60 @@ class Status(models.Model):
     def show_status(self):
         #Do cleaning on save?
         return re.sub(r'#' + self.hashtag.name, '', self.text,  flags=re.IGNORECASE)
+
+    def _format_media_entity(self, data):
+        "ez dago api gidalerrorik hauei buruz, pentsatu beharko da nola erakutsi"
+        """
+        https://dev.twitter.com/docs/tweet-entities
+        """
+        to_return = []
+        template = u'<a href="%(url)s">%(display_url)s</a>'
+        for url in data:
+            if 'display_url' not in url.keys():
+                url['display_url'] = url['url']
+            to_return.append([url['indices'][0],url['indices'][1], template % url])
+        return to_return
+
+    def _format_urls_entity(self, data):
+        to_return = []
+        template = u'<a href="%(url)s">%(display_url)s</a>'
+        for url in data:
+            if 'display_url' not in url.keys():
+                url['display_url'] = url['url']
+            to_return.append([url['indices'][0],url['indices'][1], template % url])
+        return to_return
+
+    def _format_user_mentions_entity(self, data):
+        to_return = []
+        template = u'<a href="http://twitter.com/%(screen_name)s">@%(screen_name)s</a>'
+        for user in data:
+            to_return.append([user['indices'][0], user['indices'][1], template % user])
+        return to_return
+    
+    def _format_hashtags_entity(self, data):
+        to_return = []
+        template = u'<a href="http://twitter.com/search?q=%%23%(text)s">#%(text)s</a>'
+        for hash in data:
+            to_return.append([hash['indices'][0],hash['indices'][1], template % hash])
+        return to_return
+    
+    def renderStatus(self):
+        """render status as defined by twitter guidelines"""
+        html = self.text
+        data = self.entities
+        entities = []
+        for k,v in json.loads(data).items():
+            if k == 'media':
+                entities += self._format_media_entity(v)
+            elif k == 'urls':
+                entities += self._format_urls_entity(v)
+            elif k == 'user_mentions':
+                entities += self._format_user_mentions_entity(v)
+            elif k == 'hashtags':
+                entities += self._format_hashtags_entity(v)
+        from operator import itemgetter
+        sorted_entities = sorted(entities, key=itemgetter(0))
+        sorted_entities.reverse()
+        for entity in sorted_entities:
+            html = html[:entity[0]]+entity[2]+html[entity[1]:]
+        return html
