@@ -95,20 +95,22 @@ class Status(models.Model):
     hashtag = models.ForeignKey(Hashtag)
 
     def show_status(self):
-        #Do cleaning on save?
         return re.sub(r'#' + self.hashtag.name, '', self.text,  flags=re.IGNORECASE)
 
     def _format_media_entity(self, data):
-        "ez dago api gidalerrorik hauei buruz, pentsatu beharko da nola erakutsi"
         """
         https://dev.twitter.com/docs/tweet-entities
         """
         to_return = []
         template = u'<a href="%(url)s">%(display_url)s</a>'
+        img_template = u'<img src="%(url)s" />'
         for url in data:
             if 'display_url' not in url.keys():
                 url['display_url'] = url['url']
-            to_return.append([url['indices'][0],url['indices'][1], template % url])
+            if 'photo' in url.keys():
+                to_return.append([url['indices'][0],url['indices'][1], img_template % url])
+            else:
+                to_return.append([url['indices'][0],url['indices'][1], template % url])
         return to_return
 
     def _format_urls_entity(self, data):
