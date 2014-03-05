@@ -5,21 +5,24 @@ version = '0.1'
 
 setup(name='twhst',
       version=version,
-      description="",
+      description="Follow and store tweets from twitter",
       long_description="""\
+      twhst stores tweets which complains predefinied rules. It uses Twitter's
+      search api.
 """,
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
-      keywords='',
-      author='',
-      author_email='',
-      url='',
-      license='',
+      keywords='twitter',
+      author='Aitzol Naberan',
+      author_email='anaberan@codesyntax.com',
+      url='http://github.com/codesyntax/twhst',
+      license='GPL',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
       zip_safe=False,
       install_requires=[
           # -*- Extra requirements: -*-
           'tweepy',
+          'django'
       ],
       entry_points="""
       # -*- Entry points: -*-
