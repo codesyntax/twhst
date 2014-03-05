@@ -1,9 +1,0 @@
-setup.cfg
-setup.py
-twhst/__init__.py
-twhst.egg-info/PKG-INFO
-twhst.egg-info/SOURCES.txt
-twhst.egg-info/dependency_links.txt
-twhst.egg-info/entry_points.txt
-twhst.egg-info/not-zip-safe
-twhst.egg-info/top_level.txt
