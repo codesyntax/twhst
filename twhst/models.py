@@ -48,7 +48,7 @@ class Hashtag(models.Model):
         self.create_status_from_result(result)
 
     def get_last_statuses(self):
-        return self.status_set.all()
+        return self.status_set.all().order_by('-created_at')
     
     def __unicode__(self):
         return self.name
