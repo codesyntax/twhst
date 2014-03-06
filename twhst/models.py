@@ -98,6 +98,7 @@ class Status(models.Model):
     user_listed_count = models.IntegerField(default=0)
     user_url = models.CharField(max_length=255,null=True,blank=True)
 
+    
     hashtag = models.ForeignKey(Hashtag)
 
     def show_status(self):
