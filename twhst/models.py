@@ -109,7 +109,7 @@ class Status(models.Model):
         """
         to_return = []
         template = u'<a href="%(url)s">%(display_url)s</a>'
-        img_template = u'<img src="%(url)s" />'
+        img_template = u'<div class="twitterimage"><img src="%(url)s" /></div>'
         for url in data:
             if 'display_url' not in url.keys():
                 url['display_url'] = url['url']
