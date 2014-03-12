@@ -32,7 +32,7 @@ def no_picture(result):
 
 def mention(result):
     """ search @ char for user mentions """
-    return result.text.find('@')!=-1 and True or False
+    return result.text.find('@')!=-1
 
 def no_mention(result):
     """ not(mention) """
@@ -40,6 +40,6 @@ def no_mention(result):
 
 def definition(result):
     """ return True if status text matched XXXX: pattern"""
-    return  result.text.find(':') != -1 and True or False
+    return  result.text.find(':') != -1
 
-    
+
