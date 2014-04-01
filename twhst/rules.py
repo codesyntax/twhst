@@ -1,3 +1,4 @@
+import re
 
 def include_all(result):
     return True
@@ -42,4 +43,7 @@ def definition(result):
     """ return True if status text matched XXXX: pattern"""
     return  result.text.find(':') != -1 and True or False
 
+def brackets(result):
+    """ True if bracket count in text is 2"""
+    return  len(re.findall(r'"', result.text)) == 2
     

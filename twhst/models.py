@@ -4,19 +4,30 @@ from photologue.models import Photo
 
 from django.db import models
 
-from twhst.rules import include_all, definition, no_rt, no_url, picture, no_mention
+from twhst.rules import include_all, definition, no_rt, no_url, picture, no_mention, brackets
+from twhst.dictionary import first_whitespace, first_colon, first_if_morethan_four, between_brackets
 
-
-HASHTAG_TYPE_CHOICES = ((0,'All'),
-                        (1,'Dictionary'),
-                        (2,'Sentence'),
-                        (3,'Picture'))
+HASHTAG_TYPE_CHOICES = ((0, u'All'),
+                        (1, u'Dictionary'),
+                        (2, u'Sentence'),
+                        (3, u'Picture'))
 
 RULESET_DICT = {0: [include_all],
                 1: [definition, no_rt, no_url, no_mention],
                 2: [no_rt, no_url, no_mention],
-                3: [picture, no_mention]}
+                3: [picture, no_mention, brackets]}
+    
+DICTIONARY_RULES_CHOICES = ((0, u'First whitespace'),
+                            (1, u'First colon'),
+                            (2, u'Fisrt after 4 letters'),
+                            (3, u'Between brackets')
+                            )
 
+DICTIONARY_RULES = {0: first_whitespace, #All Rule
+                    1: first_colon, #Dictionary Rule
+                    2: first_if_morethan_four, #Sentence Rule
+                    3: between_brackets, #Picture Rule
+                    }
 
 class Hashtag(models.Model):
     name = models.CharField(max_length=30, db_index=True)
@@ -24,6 +35,7 @@ class Hashtag(models.Model):
     photo = models.ForeignKey(Photo, blank=True, null=True)
     hash_type = models.IntegerField(choices=HASHTAG_TYPE_CHOICES)
     active = models.BooleanField(default=True)
+
     
     def create_status_from_result(self, result):
         status = Status(hashtag=self)
@@ -40,6 +52,12 @@ class Hashtag(models.Model):
         status.user_id = result.user.id
         status.user_created_at = result.user.created_at
         status.save()
+        dict_title, dict_description = DICTIONARY_RULES[self.hash_type](status)
+        dictionary_item = Dictionary(title=dict_title,
+                                     description=dict_description,
+                                     status=status,
+                                     hashtag=self)
+        dictionary_item.save()
         
     def parse(self, result):
         for rule in RULESET_DICT.get(self.hash_type):
@@ -163,3 +181,11 @@ class Status(models.Model):
         for entity in sorted_entities:
             html = html[:entity[0]]+entity[2]+html[entity[1]:]
         return html
+
+class Dictionary(models.Model):
+    title = models.CharField(max_length=140, db_index=True)
+    description = models.CharField(max_length=140) 
+    hashtag = models.ForeignKey(Hashtag, db_index=True)
+    status = models.ForeignKey(Status)
+    added = models.DateField(auto_now_add=True)
+    
