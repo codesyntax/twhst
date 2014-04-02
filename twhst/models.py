@@ -6,7 +6,16 @@ from django.db import models
 
 from twhst.rules import include_all, definition, no_rt, no_url, picture, no_mention, brackets
 from twhst.dictionary import first_whitespace, first_colon, first_if_morethan_four, between_brackets
-
+"""
+for hashtag in Hashtag.objects.all():
+...     for st in Status.objects.filter(hashtag=hashtag):
+...         title, description = DICTIONARY_RULES[hashtag.hash_type](st)
+...         dictionary_item = Dictionary(title=title,
+...                                      description=description,
+...                                      status=st,
+...                                      hashtag=hashtag)
+...         dictionary_item.save()
+"""
 HASHTAG_TYPE_CHOICES = ((0, u'All'),
                         (1, u'Dictionary'),
                         (2, u'Sentence'),
@@ -32,6 +41,7 @@ DICTIONARY_RULES = {0: first_whitespace, #All Rule
 class Hashtag(models.Model):
     name = models.CharField(max_length=30, db_index=True)
     description = models.TextField()
+    slug = models.CharField(max_length=30, db_index=True)
     photo = models.ForeignKey(Photo, blank=True, null=True)
     hash_type = models.IntegerField(choices=HASHTAG_TYPE_CHOICES)
     active = models.BooleanField(default=True)
@@ -184,7 +194,8 @@ class Status(models.Model):
 
 class Dictionary(models.Model):
     title = models.CharField(max_length=140, db_index=True)
-    description = models.CharField(max_length=140) 
+    description = models.CharField(max_length=140)
+    slug = models.CharField(max_length=140, db_index=True)
     hashtag = models.ForeignKey(Hashtag, db_index=True)
     status = models.ForeignKey(Status)
     added = models.DateField(auto_now_add=True)
