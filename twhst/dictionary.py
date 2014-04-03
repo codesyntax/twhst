@@ -1,10 +1,13 @@
 import re
 
+def _normalize(text):
+    return re.sub(r'[-\"+,\'#]','', text).strip()
+
 def _splitter(text, delimiter):
     splitted = text.split(delimiter)
     first = splitted[0]
     second = ' '.join(splitted[1:])
-    return first, second
+    return _normalize(first), second
     
 def first_whitespace(status):
     return _splitter(status.text, u' ')
@@ -20,7 +23,7 @@ def first_if_morethan_four(status):
     else:
         first = ' '.join(splitted[0:2])
         second = ' '.join(splitted[2:])
-    return first, second
+    return _normalize(first), second
 
 def between_brackets(status):
     match = re.match(r'"(.*?)"(.*)', status.text)

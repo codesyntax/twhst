@@ -4,7 +4,7 @@ from photologue.models import Photo
 
 from django.db import models
 
-from twhst.rules import include_all, definition, no_rt, no_url, picture, no_mention, brackets
+from twhst.rules import include_all, definition, no_rt, no_url, picture, no_mention, brackets, no_start_with_hash
 from twhst.dictionary import first_whitespace, first_colon, first_if_morethan_four, between_brackets
 """
 for hashtag in Hashtag.objects.all():
@@ -22,8 +22,8 @@ HASHTAG_TYPE_CHOICES = ((0, u'All'),
                         (3, u'Picture'))
 
 RULESET_DICT = {0: [include_all],
-                1: [definition, no_rt, no_url, no_mention],
-                2: [no_rt, no_url, no_mention],
+                1: [definition, no_rt, no_url, no_mention, no_start_with_hash],
+                2: [no_rt, no_url, no_mention, no_start_with_hash],
                 3: [picture, no_mention, brackets]}
     
 DICTIONARY_RULES_CHOICES = ((0, u'First whitespace'),
@@ -42,6 +42,7 @@ class Hashtag(models.Model):
     name = models.CharField(max_length=30, db_index=True)
     description = models.TextField()
     slug = models.CharField(max_length=30, db_index=True)
+    #ALTER TABLE `twhst_hashtag` ADD `slug` VARCHAR(30) NOT NULL AFTER `description`;
     photo = models.ForeignKey(Photo, blank=True, null=True)
     hash_type = models.IntegerField(choices=HASHTAG_TYPE_CHOICES)
     active = models.BooleanField(default=True)
