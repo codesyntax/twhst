@@ -1,20 +1,21 @@
 import re
 import json
 from photologue.models import Photo
-
+from django.template.defaultfilters import slugify
 from django.db import models
 
 from twhst.rules import include_all, definition, no_rt, no_url, picture, no_mention, brackets, no_start_with_hash
 from twhst.dictionary import first_whitespace, first_colon, first_if_morethan_four, between_brackets
 """
+from twhst.models import *
 for hashtag in Hashtag.objects.all():
-...     for st in Status.objects.filter(hashtag=hashtag):
-...         title, description = DICTIONARY_RULES[hashtag.hash_type](st)
-...         dictionary_item = Dictionary(title=title,
-...                                      description=description,
-...                                      status=st,
-...                                      hashtag=hashtag)
-...         dictionary_item.save()
+     for st in Status.objects.filter(hashtag=hashtag):
+         title, description = DICTIONARY_RULES[hashtag.hash_type](st)
+         dictionary_item = Dictionary(title=title,
+                                      description=description,
+                                      status=st,
+                                      hashtag=hashtag)
+         dictionary_item.save()
 """
 HASHTAG_TYPE_CHOICES = ((0, u'All'),
                         (1, u'Dictionary'),
@@ -66,6 +67,7 @@ class Hashtag(models.Model):
         dict_title, dict_description = DICTIONARY_RULES[self.hash_type](status)
         dictionary_item = Dictionary(title=dict_title,
                                      description=dict_description,
+                                     slug=slugify(dict_title),
                                      status=status,
                                      hashtag=self)
         dictionary_item.save()
