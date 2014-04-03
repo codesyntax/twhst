@@ -56,3 +56,8 @@ def brackets(result):
     """ True if bracket count in text is 2"""
     return  len(re.findall(r'"', result.text)) == 2
     
+def start_with_hash(result):
+    return result.text.startswith('#')
+
+def no_start_with_hash(result):
+    return not(start_with_hash(result))
