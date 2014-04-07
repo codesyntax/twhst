@@ -7,7 +7,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         api = get_tweepy_api()
         for hashtag in Hashtag.objects.filter(active=True):
-            last_id = Status.objects.filter(hashtag=hashtag)
+            last_id = Status.objects.filter(hashtag=hashtag).order_by('-pk')
             name = '#' + hashtag.name
             if last_id.exists():
                 last_id = last_id[0]
